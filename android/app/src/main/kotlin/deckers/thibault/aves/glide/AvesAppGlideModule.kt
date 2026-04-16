@@ -31,18 +31,14 @@ class AvesAppGlideModule : AppGlideModule() {
     override fun applyOptions(context: Context, builder: GlideBuilder) {
         // hide noisy warning (e.g. for images that can't be decoded)
         builder.setLogLevel(Log.ERROR)
-
+        // Helper for byte conversion
+        val megabyte = 1024L * 1024L
         // sizing
         val memorySizeCalculator = MemorySizeCalculator.Builder(context).build()
         builder.setMemorySizeCalculator(memorySizeCalculator)
-        val size: Int = memorySizeCalculator.bitmapPoolSize
-        if (size > 0) {
-            builder.setBitmapPool(LruBitmapPool(size.toLong()))
-        } else {
-            builder.setBitmapPool(BitmapPoolAdapter())
-        }
-        builder.setArrayPool(LruArrayPool(memorySizeCalculator.arrayPoolSizeInBytes))
-        builder.setMemoryCache(LruResourceCache(memorySizeCalculator.memoryCacheSize.toLong()))
+        builder.setBitmapPool(LruBitmapPool(megabyte * 16))
+        builder.setArrayPool(LruArrayPool((2 * megabyte).toInt()))
+        builder.setMemoryCache(LruResourceCache(megabyte * 16))
 
         val diskCacheSize = DiskCache.Factory.DEFAULT_DISK_CACHE_SIZE
         val internalCacheDiskCacheFactory = InternalCacheDiskCacheFactory(context, DiskCache.Factory.DEFAULT_DISK_CACHE_DIR, diskCacheSize.toLong())
